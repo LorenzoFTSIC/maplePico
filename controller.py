@@ -8,12 +8,13 @@ pico_port = None
 # Find the Pico automatically
 for port in list_ports.comports():
 
-    print(port.device, port.description)
+    print(port.device, port.vid, port.pid)
 
-    if "CircuitPython CDC data" in port.description:
+    if port.vid == 0x239A:  # Raspberry Pi / CircuitPython VID
         pico_port = port.device
         break
 
+    
 if pico_port is None:
     raise Exception("Pico not found")
 
