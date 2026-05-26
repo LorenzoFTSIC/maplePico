@@ -5,21 +5,22 @@ from serial.tools import list_ports
 
 pico_port = None
 
-# Find the Pico automatically
-for port in list_ports.comports():
+# # Find the Pico automatically
+# for port in list_ports.comports():
 
-    print(port.device, port.vid, port.pid)
+#     print(port.device, port.vid, port.pid)
 
-    if port.vid == 0x239A:  # Raspberry Pi / CircuitPython VID
-        pico_port = port.device
-        break
+#     if port.vid == 9114:  # Raspberry Pi / CircuitPython VID
+#         pico_port = port.device
+#         break
 
     
-if pico_port is None:
-    raise Exception("Pico not found")
+# if pico_port is None:
+#     raise Exception("Pico not found")
 
-# Connect to Pico
-pico = serial.Serial(pico_port, 115200)
+# # Connect to Pico
+# pico = serial.Serial(pico_port, 115200)
+pico = serial.Serial("COM5", 115200, timeout=1)
 
 # Give serial connection time to initialize
 time.sleep(2)

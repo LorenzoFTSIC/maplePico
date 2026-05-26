@@ -130,7 +130,7 @@ while True:
     # listen for serial commands
     if serial.in_waiting > 0:
 
-        command = serial.readline().decode("utf-8", errors="ignore").strip().upper()
+        command = serial.readline().decode().strip()
 
         print("RX:", command)
 
