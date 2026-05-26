@@ -8,48 +8,7 @@ import usb_cdc
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keycode import Keycode
 
-kbd = Keyboard(usb_hid.devices)
-serial = usb_cdc.data
 
-# start stop toggle button on GP15
-toggleButton = digitalio.DigitalInOut(board.GP15)
-toggleButton.direction = digitalio.Direction.INPUT
-toggleButton.pull = digitalio.Pull.UP
-
-# pause button on GP14
-pauseButton = digitalio.DigitalInOut(board.GP14)
-pauseButton.direction = digitalio.Direction.INPUT
-pauseButton.pull = digitalio.Pull.UP
-
-# LED on GP16
-led = digitalio.DigitalInOut(board.GP16)
-led.direction = digitalio.Direction.OUTPUT
-
-# Farming toggle
-farming = False
-
-last_toggleButton = True
-
-farm_start_time = 0
-lastprint = -1
-
-# track held state
-holding_a = False
-
-paused = False
-
-last_pauseButton = True
-
-pause_start_time = 0
-total_paused_time = 0
-
-
-# time breakpoints
-base_breakpoints = [46, 46.2, 98, 101]
-#testing breakpoint
-#breakpoints = [5, 5.2, 10, 11]
-
-last_elapsed = 0
 
 #functions
 def run_rotation(elapsed):
@@ -121,29 +80,75 @@ def randomBreakpoints(breakpoints):
 
     return breakpoints
         
-    
+kbd = Keyboard(usb_hid.devices)
+serial = usb_cdc.data
+
+# start stop toggle button on GP15
+toggleButton = digitalio.DigitalInOut(board.GP15)
+toggleButton.direction = digitalio.Direction.INPUT
+toggleButton.pull = digitalio.Pull.UP
+
+# pause button on GP14
+pauseButton = digitalio.DigitalInOut(board.GP14)
+pauseButton.direction = digitalio.Direction.INPUT
+pauseButton.pull = digitalio.Pull.UP
+
+# LED on GP16
+led = digitalio.DigitalInOut(board.GP16)
+led.direction = digitalio.Direction.OUTPUT
+
+# Farming toggle
+farming = False
+
+last_toggleButton = True
+
+farm_start_time = 0
+lastprint = -1
+
+# track held state
+holding_a = False
+
+paused = False
+
+last_pauseButton = True
+
+pause_start_time = 0
+total_paused_time = 0
+
+
+# time breakpoints
+base_breakpoints = [46, 46.2, 98, 101]
+#testing breakpoint
+#breakpoints = [5, 5.2, 10, 11]
+
+last_elapsed = 0
+
 breakpoints = randomBreakpoints(base_breakpoints.copy())
+
 
 while True:
     # listen for serial commands
     if serial.in_waiting > 0:
 
-        command = serial.readline().decode("utf-8", errors="ignore").strip()
+        command = serial.readline().decode("utf-8", errors="ignore").strip().upper()
 
-        print("Received:", command)
+        print("RX:", command)
 
-        if command == "TOGGLE":
+        if "TOGGLE" in command:
             farming = not farming
+            print("FARMING:", farming)
 
             if farming:
                 farm_start_time = time.monotonic()
                 last_elapsed = 0
+                breakpoints = randomBreakpoints(base_breakpoints.copy())
             else:
                 kbd.release_all()
                 holding_a = False
 
-        elif command == "PAUSE" and farming:
+        elif "PAUSE" in command:
             paused = not paused
+            print("PAUSE:", paused) 
 
 
     current_toggleButton = toggleButton.value
@@ -192,8 +197,9 @@ while True:
             print("NEW ROTATION")
             breakpoints = randomBreakpoints(base_breakpoints.copy())
             print("New breakpoints:", breakpoints)
-
+        
         last_elapsed = elapsed
+
         rounded = round(elapsed, 1)
 
         if rounded != lastprint:
