@@ -1,0 +1,150 @@
+# Main controller for template matching and determining input pattern
+# Inputs get sent to pi pico then returned
+
+import serial
+import keyboard
+import time
+from serial.tools import list_ports
+import cv2
+import numpy as np
+import mss
+
+#cfg
+PICO_PORT = None
+BAUD_RATE = 115200
+
+TEMPLATEPNG = "./ss/laptop/relentless.png"
+MATCH_THRESHOLD = 0.50
+
+SCREEN_REGION = {
+    "left": 0,
+    "top": 0,
+    "width": 2560,
+    "height": 1440,
+}
+
+#serial stuff
+# pico = serial.Serial(PICO_PORT, BAUD_RATE)
+# time.sleep(2)
+
+def send_key(key_name):
+    pico.write(f"{key_name}\n".encode())
+    print("TX:", key_name)
+
+
+sct = mss.mss()
+
+def screenshot(region):
+    return np.array(sct.grab(region))[:, :, :3]
+
+
+#template matching
+
+def locate_relentless():
+
+    template = cv2.imread(TEMPLATEPNG)
+
+    if template is None:
+        raise Exception(f"Could not load {TEMPLATEPNG}")
+
+#ss commented for static testing
+    # screen = screenshot(SCREEN_REGION)
+#static ss with relentless off CD
+    # screen = cv2.imread("./ss/laptop/full.png")
+#static ss with relentless on CD and active
+    screen = cv2.imread("./ss/laptop/bufffavss.png")
+
+    result = cv2.matchTemplate(
+        screen,
+        template,
+        cv2.TM_CCOEFF_NORMED
+    )
+
+    locations = np.where(result >= MATCH_THRESHOLD)
+
+    matches = []
+
+    h = template.shape[0]
+    w = template.shape[1]
+
+    for (x, y) in zip(locations[1], locations[0]):
+        matches.append([int(x), int(y), int(w), int(h)])
+        matches.append([int(x), int(y), int(w), int(h)])
+
+    matches, weights = cv2.groupRectangles(matches, 1, 0.2)
+
+    #for testing
+    test_img = screen.copy()
+
+    for (x, y, w, h) in matches:
+        cv2.rectangle(
+            test_img,
+            (x, y),
+            (x + w, y + h),
+            (0, 255, 0),
+            2
+        )
+
+    cv2.imshow("Template Match Debug", test_img)
+    cv2.waitKey(0)  # 0 to hold 1 to update repeatedly?
+
+
+    if len(matches) == 0:
+        return None
+    else:
+        print(len(matches))
+        print(matches)
+
+    x, y, w, h = matches[0]
+
+    return {
+        "x": x,
+        "y": y,
+        "width": w,
+        "height": h,
+        "center_x": x + w // 2,
+        "center_y": y + h // 2
+    }
+
+
+
+# offsets_region = {
+#     "left": relentless["x"] + 50,
+#   "top": relentless["y"] + 100,
+#    "width": 200,
+#   "height": 50
+# }
+
+
+#mainloop
+last_action = 0
+
+while True:
+
+
+    print("Locating Relentless...")
+
+    relentless = locate_relentless()
+
+    if relentless is None:
+        raise Exception("Could not find Relentless template")
+
+    print("Found:")
+    print(relentless)
+    # region_img = screenshot(example_region)
+
+
+    
+    # put future OpenCV logic here
+    
+
+    current_time = time.time()
+
+    # test action every 5 seconds
+    if current_time - last_action > 5:
+
+        # send_key("THREE")
+        
+        last_action = current_time
+
+    time.sleep(0.1)
