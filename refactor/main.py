@@ -14,7 +14,7 @@ PICO_PORT = None
 BAUD_RATE = 115200
 
 TEMPLATEPNG = "./ss/laptop/relentless.png"
-MATCH_THRESHOLD = 0.50
+MATCH_THRESHOLD = 0.90
 
 SCREEN_REGION = {
     "left": 0,
@@ -43,16 +43,15 @@ def screenshot(region):
 def locate_relentless():
 
     template = cv2.imread(TEMPLATEPNG)
-
     if template is None:
         raise Exception(f"Could not load {TEMPLATEPNG}")
 
 #ss commented for static testing
     # screen = screenshot(SCREEN_REGION)
 #static ss with relentless off CD
-    # screen = cv2.imread("./ss/laptop/full.png")
+    screen = cv2.imread("./ss/laptop/full.png")
 #static ss with relentless on CD and active
-    screen = cv2.imread("./ss/laptop/bufffavss.png")
+    # screen = cv2.imread("./ss/laptop/bufffavss.png")
 
     result = cv2.matchTemplate(
         screen,
@@ -118,6 +117,7 @@ def locate_relentless():
 
 #mainloop
 last_action = 0
+keyIsHeld = False
 
 while True:
 
@@ -136,6 +136,14 @@ while True:
 
     
     # put future OpenCV logic here
+    # check if relentless is off CD
+
+
+    #key logic
+
+    #start with checking if key is being held down
+    if keyIsHeld:
+        send_key("RELEASE_ALL")
     
 
     current_time = time.time()
