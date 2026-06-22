@@ -4,6 +4,7 @@
 import serial
 import keyboard
 import time
+import random
 from serial.tools import list_ports
 import cv2
 import numpy as np
@@ -13,8 +14,8 @@ import mss
 PICO_PORT = None
 BAUD_RATE = 115200
 
-TEMPLATEPNG = "./ss/laptop/relentless.png"
-MATCH_THRESHOLD = 0.90
+TEMPLATEPNG = "./ss/pc/relentless.png"
+MATCH_THRESHOLD = 0.9
 
 SCREEN_REGION = {
     "left": 0,
@@ -22,6 +23,11 @@ SCREEN_REGION = {
     "width": 2560,
     "height": 1440,
 }
+
+is_key_held = False
+key_held = ""
+sct = mss.mss()
+last_action = 0
 
 #serial stuff
 # pico = serial.Serial(PICO_PORT, BAUD_RATE)
@@ -32,7 +38,6 @@ def send_key(key_name):
     print("TX:", key_name)
 
 
-sct = mss.mss()
 
 def screenshot(region):
     return np.array(sct.grab(region))[:, :, :3]
@@ -46,12 +51,12 @@ def locate_relentless():
     if template is None:
         raise Exception(f"Could not load {TEMPLATEPNG}")
 
-#ss commented for static testing
-    # screen = screenshot(SCREEN_REGION)
+# ss commented for static testing
+    screen = screenshot(SCREEN_REGION)
 #static ss with relentless off CD
-    screen = cv2.imread("./ss/laptop/full.png")
+    # screen = cv2.imread("./ss/pc/full.png")
 #static ss with relentless on CD and active
-    # screen = cv2.imread("./ss/laptop/bufffavss.png")
+    # screen = cv2.imread("./ss/pc/bufffavss.png")
 
     result = cv2.matchTemplate(
         screen,
@@ -84,8 +89,8 @@ def locate_relentless():
             2
         )
 
-    cv2.imshow("Template Match Debug", test_img)
-    cv2.waitKey(0)  # 0 to hold 1 to update repeatedly?
+    # cv2.imshow("Template Match Debug", test_img)
+    # cv2.waitKey(0)  # 0 to hold 1 to update repeatedly?
 
 
     if len(matches) == 0:
@@ -105,7 +110,17 @@ def locate_relentless():
         "center_y": y + h // 2
     }
 
+def jump_att(reps):
+    for i in range(0, reps):
+        print(f"rep{i}")
 
+def recast_relentless():
+    time.sleep(random.uniform(0.1, 0.3))
+    # send_key("RELEASE_ALL")
+    print("RELEASE_ALL")
+    time.sleep(random.uniform(0.1, 0.3))
+    print("THREE")
+    # send_key("THREE")
 
 # offsets_region = {
 #     "left": relentless["x"] + 50,
@@ -116,35 +131,36 @@ def locate_relentless():
 
 
 #mainloop
-last_action = 0
-keyIsHeld = False
 
 while True:
-
+    
 
     print("Locating Relentless...")
 
-    relentless = locate_relentless()
+    relentless_offCD = locate_relentless()
 
-    if relentless is None:
-        raise Exception("Could not find Relentless template")
+    if relentless_offCD is None:
+        print("relentless_offCD not found, on CD?")
 
     print("Found:")
-    print(relentless)
+    print(relentless_offCD)
     # region_img = screenshot(example_region)
 
 
-    
-    # put future OpenCV logic here
-    # check if relentless is off CD
-
-
-    #key logic
-
     #start with checking if key is being held down
-    if keyIsHeld:
-        send_key("RELEASE_ALL")
-    
+    # if is_key_held:
+    #     send_key("RELEASE_ALL")
+
+    if relentless_offCD:
+        current_time = time.time()
+        print(current_time)
+        # recast_relentless()
+    else:
+        print("pretend this is holding alt")
+
+    # elif(is_key_held):
+    #     pass
+    # check if relentless is off CD
 
     current_time = time.time()
 
@@ -154,5 +170,7 @@ while True:
         # send_key("THREE")
         
         last_action = current_time
-
-    time.sleep(0.1)
+    
+    #reset pattern matching (copy later if need coords)
+    relentless_offCD = None
+    time.sleep(1)
