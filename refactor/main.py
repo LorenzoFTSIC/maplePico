@@ -14,7 +14,7 @@ import mss
 PICO_PORT = None
 BAUD_RATE = 115200
 
-TEMPLATEPNG = "./ss/pc/relentless.png"
+templateImg = "./ss/pc/relentless.png"
 MATCH_THRESHOLD = 0.9
 
 SCREEN_REGION = {
@@ -45,21 +45,15 @@ def screenshot(region):
 
 #template matching
 
-def locate_relentless():
+def matchTemplate(templateImg, matchImg):
 
-    template = cv2.imread(TEMPLATEPNG)
+    template = cv2.imread(templateImg)
     if template is None:
-        raise Exception(f"Could not load {TEMPLATEPNG}")
+        raise Exception(f"Could not load {templateImg}")
 
-# ss commented for static testing
-    screen = screenshot(SCREEN_REGION)
-#static ss with relentless off CD
-    # screen = cv2.imread("./ss/pc/full.png")
-#static ss with relentless on CD and active
-    # screen = cv2.imread("./ss/pc/bufffavss.png")
 
     result = cv2.matchTemplate(
-        screen,
+        matchImg,
         template,
         cv2.TM_CCOEFF_NORMED
     )
@@ -78,7 +72,7 @@ def locate_relentless():
     matches, weights = cv2.groupRectangles(matches, 1, 0.2)
 
     #for testing
-    test_img = screen.copy()
+    test_img = matchImg.copy()
 
     for (x, y, w, h) in matches:
         cv2.rectangle(
@@ -89,8 +83,8 @@ def locate_relentless():
             2
         )
 
-    # cv2.imshow("Template Match Debug", test_img)
-    # cv2.waitKey(0)  # 0 to hold 1 to update repeatedly?
+    cv2.imshow("Template Match Debug", test_img)
+    cv2.waitKey(0)  # 0 to hold 1 to update repeatedly?
 
 
     if len(matches) == 0:
@@ -137,7 +131,13 @@ while True:
 
     print("Locating Relentless...")
 
-    relentless_offCD = locate_relentless()
+    # ss commented for static testing
+    # matchImg = screenshot(SCREEN_REGION)
+    #static ss with relentless off CD
+    matchImg = cv2.imread("./ss/pc/full.png")
+    #static ss with relentless on CD and active
+    # matchImg = cv2.imread("./ss/pc/bufffavss.png")
+    relentless_offCD = matchTemplate(templateImg=templateImg, matchImg=matchImg)
 
     if relentless_offCD is None:
         print("relentless_offCD not found, on CD?")
@@ -146,11 +146,6 @@ while True:
     print(relentless_offCD)
     # region_img = screenshot(example_region)
 
-
-    #start with checking if key is being held down
-    # if is_key_held:
-    #     send_key("RELEASE_ALL")
-
     if relentless_offCD:
         current_time = time.time()
         print(current_time)
@@ -158,9 +153,6 @@ while True:
     else:
         print("pretend this is holding alt")
 
-    # elif(is_key_held):
-    #     pass
-    # check if relentless is off CD
 
     current_time = time.time()
 
