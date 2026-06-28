@@ -1,7 +1,8 @@
-class RotationStep:
+class Rotation:
 
-    def __init__(self, skill, start, end):
+    def __init__(self, skill, map, character, rotationSteps):
 
         self.skill = skill
-        self.start = start
-        self.end = end
+        self.map = map
+        self.character = character
+        self.rotationSteps = rotationSteps
