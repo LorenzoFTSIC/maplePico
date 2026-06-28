@@ -5,8 +5,8 @@ class Character:
         self.skills = {}
         self.rotations = {}
 
-    def add_skill(self, skill):
+    def addSkill(self, skill):
         self.skills[skill.name] = skill
 
-    def add_rotation(self, name, rotation):
+    def addRotation(self, name, rotation):
         self.rotations[name] = rotation

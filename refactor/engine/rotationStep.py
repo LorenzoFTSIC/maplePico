@@ -21,27 +21,3 @@ class RotationStep:
             <
             self.end + self.rndmDelay
         )
-        # RotationStep(
-        #     skill=crunch,
-        #     start=0,
-        #     end=1
-        # ),
-
-        # RotationStep(
-        #     skill=boundless,
-        #     start=2,
-        #     end=4
-        # ),
-
-        # RotationStep(
-        #     skill=concussion,
-        #     start=5,
-        #     end=46
-        # ),
-
-        # RotationStep(
-        #     skill=concussion,
-        #     start=48,
-        #     end=120
-        # )
-    

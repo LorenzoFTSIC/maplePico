@@ -1,10 +1,10 @@
 from engine.character import Character
 from engine.skill import Skill
 from engine.action import Action
+from engine.rotation import Rotation
 from engine.rotationStep import RotationStep
 
 from adafruit_hid.keycode import Keycode
-
 
 def createDemonSlayer():
 
@@ -23,19 +23,55 @@ def createDemonSlayer():
             action=Action.TAP
         )
 
-    crunch = Skill(
-            name="crunch",
+    chomp = Skill(
+            name="chomp",
             key=Keycode.FOUR,
             action=Action.TAP
         )
     
     #initialize skills
-    demonSlayer.add_skill(concussion)
-    demonSlayer.add_skill(boundless)
-    demonSlayer.add_skill(crunch)
+    demonSlayer.addSkill(concussion)
+    demonSlayer.addSkill(boundless)
+    demonSlayer.addSkill(chomp)
     
+    #rotations
+    universalTraining = Rotation("TPFarming")
 
-    # Rotation
-    demonSlayer.rotations = {}
+    #rotation steps
+    universalTraining.addStep(
+        RotationStep(
+            skill=chomp,
+            start=0,
+            end=1
+        )
+    )
+
+    universalTraining.addStep(
+        RotationStep(
+            skill=boundless,
+            start=1,
+            end=2
+        )
+    )
+
+    universalTraining.addStep(
+        RotationStep(
+            skill=concussion,
+            start=3,
+            end=53
+        )
+    )
+
+    universalTraining.addStep(
+        RotationStep(
+            skill=concussion,
+            start=49,
+            end=105
+        )
+    )
+
+
+    #intialize rotation
+    demonSlayer.addRotation(universalTraining)
 
     return demonSlayer
