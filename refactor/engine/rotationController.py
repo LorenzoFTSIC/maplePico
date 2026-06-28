@@ -1,4 +1,5 @@
 import time
+import random
 
 
 class RotationController:
@@ -60,3 +61,19 @@ class RotationController:
         self.start_time = time.monotonic()
 
         self.total_pause_time = 0
+
+    def prepare_rotation(self):
+        ##
+        ##TODO:: ensure minimum breakpoint of a breakpoint is > the one before it
+        ##
+        for step in self.rotation.steps:
+
+            step.runtime_start = (
+                step.start +
+                random.uniform(-0.2, 0.2)
+            )
+
+            step.runtime_end = (
+                step.end +
+                random.uniform(-0.2, 0.2)
+            )
