@@ -37,7 +37,8 @@ def createDemonSlayer():
         RotationStep(
             skill=chomp,
             start=0,
-            end=1
+            end=1,
+            maxOffset=0.2
         )
     )
 
@@ -45,7 +46,8 @@ def createDemonSlayer():
         RotationStep(
             skill=boundless,
             start=1,
-            end=2
+            end=2,
+            maxOffset=0.2
         )
     )
 
@@ -53,7 +55,8 @@ def createDemonSlayer():
         RotationStep(
             skill=concussion,
             start=3,
-            end=53
+            end=53,
+            maxOffset=0.2
         )
     )
 
@@ -61,7 +64,8 @@ def createDemonSlayer():
         RotationStep(
             skill=concussion,
             start=49,
-            end=105
+            end=105,
+            maxOffset=0.2
         )
     )
 

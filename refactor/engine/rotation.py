@@ -16,40 +16,50 @@ class Rotation:
         if len(self.rotationSteps) == 0:
             return
 
-        # reset  timings
+        # Reset timings
         for step in self.rotationSteps:
             step.currentStart = step.start
             step.currentEnd = step.end
 
-        # start never changes
+        # First step's start never changes
         self.rotationSteps[0].currentStart = self.rotationSteps[0].start
 
         for i, step in enumerate(self.rotationSteps):
 
-            currentEnd = step.currentEnd
-
             if i == 0:
 
-                offset = random.uniform(
-                    -step.endRandom,
-                    step.endRandom
+                minimumOffset = (
+                step.minimumGap - (step.end - step.start)
                 )
 
-            else:
-
-                previousStep = self.rotationSteps[i - 1]
-
-                minimumOffset = (
-                    previousStep.currentEnd
-                    - currentEnd
+                minimumOffset = min(
+                    minimumOffset,
+                    step.maxOffset
                 )
 
                 offset = random.uniform(
                     minimumOffset,
-                    step.endRandom
+                    step.maxOffset
                 )
 
-                step.currentStart = previousStep.currentEnd
+            else:
+                previousStep = self.rotationSteps[i - 1]
+
+                currentGap = step.end - previousStep.currentEnd
+
+                minimumOffset = (
+                    -currentGap + step.minimumGap
+                )
+
+                minimumOffset = min(
+                    minimumOffset,
+                    step.maxOffset
+                )
+
+                offset = random.uniform(
+                    minimumOffset,
+                    step.maxOffset
+                )
 
             step.currentEnd += offset
 
