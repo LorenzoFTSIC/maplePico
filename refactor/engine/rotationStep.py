@@ -1,12 +1,15 @@
+
 class RotationStep:
 
-    def __init__(self, skill, start, end, maxOffset=0):
+    def __init__(self, skill, start, end, action, maxOffset=0):
 
         self.skill = skill
 
         # Base timings
         self.start = start
         self.end = end
+
+        self.action = action
 
         # Randomization
         self.maxOffset = maxOffset

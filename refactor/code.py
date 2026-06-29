@@ -1,5 +1,6 @@
-# Pi pico controller
-# mimics the inputs recieved from the main controller
+# Pi Pico controller
+# Mimics the inputs received from the main controller
+
 import time
 import usb_cdc
 import usb_hid
@@ -14,7 +15,9 @@ KEY_MAP = {
     "A": Keycode.A,
     "B": Keycode.B,
     "THREE": Keycode.THREE,
+    "FOUR": Keycode.FOUR,
     "SPACE": Keycode.SPACE,
+    "RIGHT_ALT": Keycode.RIGHT_ALT,
 }
 
 while True:
@@ -23,15 +26,37 @@ while True:
 
         command = serial.readline().decode().strip().upper()
 
-
-
         print("RX:", command)
 
-        if command in KEY_MAP:
-            kbd.press(KEY_MAP[command])
-            kbd.release(KEY_MAP[command])
+        parts = command.split()
 
-        if command == "RELEASE_ALL":
-            kbd.release_all()
+        if len(parts) == 1:
+
+            if parts[0] == "RELEASE_ALL":
+                kbd.release_all()
+
+        elif len(parts) == 2:
+
+            action = parts[0]
+            key = parts[1]
+
+            if key not in KEY_MAP:
+                print("Unknown key:", key)
+                continue
+
+            keycode = KEY_MAP[key]
+
+            if action == "PRESS":
+                kbd.press(keycode)
+
+            elif action == "RELEASE":
+                kbd.release(keycode)
+
+            elif action == "TAP":
+                kbd.press(keycode)
+                kbd.release(keycode)
+
+            else:
+                print("Unknown action:", action)
 
     time.sleep(0.01)

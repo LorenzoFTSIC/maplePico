@@ -3,8 +3,7 @@ from engine.skill import Skill
 from engine.action import Action
 from engine.rotation import Rotation
 from engine.rotationStep import RotationStep
-
-from adafruit_hid.keycode import Keycode
+from engine.input import Input
 
 def createDemonSlayer():
 
@@ -13,20 +12,17 @@ def createDemonSlayer():
     # Skills
     concussion = Skill(
             name="concussion",
-            key=Keycode.RIGHT_ALT,
-            action=Action.HOLD
+            key=Input.RIGHT_ALT,
         )
 
     boundless = Skill(
             name="boundless",
-            key=Keycode.THREE,
-            action=Action.TAP
+            key=Input.THREE,
         )
 
     chomp = Skill(
             name="chomp",
-            key=Keycode.FOUR,
-            action=Action.TAP
+            key=Input.FOUR,
         )
     
     #rotations
