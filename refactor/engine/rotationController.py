@@ -1,5 +1,6 @@
 import time
 import random
+from action import Action
 
 
 class RotationController:
@@ -78,3 +79,27 @@ class RotationController:
                 random.uniform(-0.2, 0.2)
             )
 
+
+    def update(self, pico):
+
+        if not self.running or self.paused:
+            return
+
+        elapsed = self.elapsed()
+
+        for step in self.rotation.steps:
+
+            start = getattr(step, "runtime_start", step.start)
+            end = getattr(step, "runtime_end", step.end)
+
+            if start <= elapsed < end:
+
+                skill = step.skill
+
+                if skill.action == Action.HOLD:
+                    pico.hold(skill.key)
+
+                elif skill.action == Action.TAP:
+                    pico.tap(skill.key)
+
+                return

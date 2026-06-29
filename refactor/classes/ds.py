@@ -29,11 +29,6 @@ def createDemonSlayer():
             action=Action.TAP
         )
     
-    #initialize skills
-    demonSlayer.addSkill(concussion)
-    demonSlayer.addSkill(boundless)
-    demonSlayer.addSkill(chomp)
-    
     #rotations
     universalTraining = Rotation("TPFarming")
 

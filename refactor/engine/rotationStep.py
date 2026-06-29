@@ -1,23 +1,15 @@
 class RotationStep:
 
-    def __init__(self, skill, start, end):
+    def __init__(self, skill, start, end, randomization=0):
 
         self.skill = skill
 
+        # Base timings
         self.start = start
         self.end = end
-        #move to rotationcontroller?
-        self.rndmDelay = 0
 
-        self.runtime_start = start
-        self.runetime_end = end
+        # Runtime timings
+        self.currentStart = start
+        self.currentEnd = end
 
-
-    def is_active(self, elapsed):
-
-        return (
-            self.start + self.rndmDelay
-            <= elapsed
-            <
-            self.end + self.rndmDelay
-        )
+        self.randomization = randomization
