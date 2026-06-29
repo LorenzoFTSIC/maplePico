@@ -34,6 +34,7 @@ class RotationController:
         if not self.paused:
             self.paused = True
             self.pause_start = time.monotonic()
+            self._held_steps.clear()
 
     def resume(self):
         if self.paused:
