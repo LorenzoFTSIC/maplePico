@@ -3,7 +3,11 @@ BAUD_RATE = 115200
 
 MATCH_THRESHOLD = 0.9
 
-RELENTLESS_TEMPLATE = "./ss/pc/relentless.png"
+TEST_MODE = True
+#static ss with relentless off CD
+TEST_IMAGE = "./ss/pc/full.png"
+#static ss with relentless on CD and active
+# TEST_IMAGE = "./ss/pc/bufffavss.png"
 
 SCREEN_REGION = {
     "left": 0,

@@ -22,6 +22,12 @@ def show_debug(image, matches):
 
 def matchMyTemplate(template_path, image, debug):
 
+    if config.TEST_MODE:
+        image = config.TEST_IMAGE
+        image = cv2.imread(image)
+    else:
+        pass
+
     template = cv2.imread(template_path)
 
     if template is None:

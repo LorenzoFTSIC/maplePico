@@ -1,6 +1,5 @@
 import time
-import random
-from action import Action
+from engine.action import Action
 
 
 class RotationController:
@@ -15,6 +14,8 @@ class RotationController:
         self.pause_start = 0
         self.total_pause_time = 0
 
+        # Track which PRESS steps are currently held
+        self._held_steps = set()
 
     def start(self, rotation):
         self.rotation = rotation
@@ -23,83 +24,67 @@ class RotationController:
         self.paused = False
 
         self.start_time = time.monotonic()
-
         self.total_pause_time = 0
-        
+
     def stop(self):
         self.running = False
-
         self.paused = False
 
     def pause(self):
         if not self.paused:
-
             self.paused = True
-
             self.pause_start = time.monotonic()
 
     def resume(self):
         if self.paused:
-
             paused_time = time.monotonic() - self.pause_start
-
             self.total_pause_time += paused_time
-
             self.paused = False
 
     def elapsed(self):
         if not self.running:
-
             return 0
-
         return (
             time.monotonic()
             - self.start_time
             - self.total_pause_time
         )
-    
-    def restart(self):
+
+    def restart(self, randomize=True):
         self.start_time = time.monotonic()
-
         self.total_pause_time = 0
+        self._held_steps.clear()
 
-    def prepare_rotation(self):
-        ##
-        ##TODO:: ensure minimum breakpoint of a breakpoint is > the one before it
-        ##
-        for step in self.rotation.steps:
-
-            step.runtime_start = (
-                step.start +
-                random.uniform(-0.2, 0.2)
-            )
-
-            step.runtime_end = (
-                step.end +
-                random.uniform(-0.2, 0.2)
-            )
-
+        if randomize:
+            self.rotation.randomizeSteps()
 
     def update(self, pico):
-
         if not self.running or self.paused:
             return
 
         elapsed = self.elapsed()
 
-        for step in self.rotation.steps:
+        for i, step in enumerate(self.rotation.rotationSteps):
 
-            start = getattr(step, "runtime_start", step.start)
-            end = getattr(step, "runtime_end", step.end)
+            start = step.currentStart
+            end = step.currentEnd
+            action = step.action
+            key = step.skill.key.value
 
-            if start <= elapsed < end:
+            in_window = start <= elapsed < end
 
-                skill = step.skill
+            if action == "TAP":
+                # Fire once on entry — guard with a fired flag
+                if in_window and not getattr(step, "_fired", False):
+                    pico.tap(key)
+                    step._fired = True
+                elif not in_window:
+                    step._fired = False
 
-                if skill.action == Action.HOLD:
-                    pico.hold(skill.key)
-
-                elif skill.action == Action.TAP:
-                    pico.tap(skill.key)
-
-                return
+            elif action == "PRESS":
+                if in_window and i not in self._held_steps:
+                    pico.press(key)
+                    self._held_steps.add(i)
+                elif not in_window and i in self._held_steps:
+                    pico.release(key)
+                    self._held_steps.discard(i)
