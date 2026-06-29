@@ -1,10 +1,8 @@
 import time
 import usb_cdc
 import usb_hid
-
 import board
 import digitalio
-
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keycode import Keycode
 
@@ -13,9 +11,14 @@ led = digitalio.DigitalInOut(board.GP16)
 led.direction = digitalio.Direction.OUTPUT
 
 # Stop button on GP15
-button = digitalio.DigitalInOut(board.GP15)
-button.direction = digitalio.Direction.INPUT
-button.pull = digitalio.Pull.UP  # pressed = LOW
+stopButton = digitalio.DigitalInOut(board.GP15)
+stopButton.direction = digitalio.Direction.INPUT
+stopButton.pull = digitalio.Pull.UP
+
+# Pause button on GP14
+pauseButton = digitalio.DigitalInOut(board.GP14)
+pauseButton.direction = digitalio.Direction.INPUT
+pauseButton.pull = digitalio.Pull.UP
 
 kbd = Keyboard(usb_hid.devices)
 serial = usb_cdc.data
@@ -29,61 +32,73 @@ KEY_MAP = {
     "RIGHT_ALT": Keycode.RIGHT_ALT,
 }
 
-button_prev = True  # unpressed state (pull-up)
+stopButton_prev = True
+pauseButton_prev = True
+paused = False
 
 while True:
 
-    # --- Button check ---
-    button_state = button.value
-    if not button_state and button_prev:  # falling edge = press
+    #  Stop button (falling edge) 
+    stopButton_state = stopButton.value
+    if not stopButton_state and stopButton_prev:
         kbd.release_all()
         serial.write(b"STOP\n")
         led.value = True
         time.sleep(0.5)
         led.value = False
+    stopButton_prev = stopButton_state
 
-    button_prev = button_state
+    #  Pause button (falling edge toggles pause) 
+    pauseButton_state = pauseButton.value
+    if not pauseButton_state and pauseButton_prev:
+        paused = not paused
+        if paused:
+            kbd.release_all()
+            serial.write(b"PAUSE\n")
+            led.value = True   # LED on while paused
+        else:
+            serial.write(b"RESUME\n")
+            led.value = False
+    pauseButton_prev = pauseButton_state
 
-    # --- Serial commands ---
+    #  serial commands 
     if serial.in_waiting > 0:
-
         command = serial.readline().decode().strip().upper()
         print("RX:", command)
 
-        led.value = True
-
         parts = command.split()
 
-        if len(parts) == 1:
-            if parts[0] == "RELEASE_ALL":
-                kbd.release_all()
+        if paused:
+            pass
+        else:
+            led.value = True
 
-        elif len(parts) == 2:
+            if len(parts) == 1:
+                if parts[0] == "RELEASE_ALL":
+                    kbd.release_all()
 
-            action = parts[0]
-            key = parts[1]
+            elif len(parts) == 2:
+                action = parts[0]
+                key = parts[1]
 
-            if key not in KEY_MAP:
-                print("Unknown key:", key)
-                led.value = False
-                continue
+                if key not in KEY_MAP:
+                    print("Unknown key:", key)
+                    led.value = False
+                    continue
 
-            keycode = KEY_MAP[key]
+                keycode = KEY_MAP[key]
 
-            if action == "PRESS":
-                kbd.press(keycode)
+                if action == "PRESS":
+                    kbd.press(keycode)
+                elif action == "RELEASE":
+                    kbd.release(keycode)
+                elif action == "TAP":
+                    kbd.press(keycode)
+                    time.sleep(0.13)
+                    kbd.release(keycode)
+                else:
+                    print("Unknown action:", action)
 
-            elif action == "RELEASE":
-                kbd.release(keycode)
-
-            elif action == "TAP":
-                kbd.press(keycode)
-                time.sleep(0.13)
-                kbd.release(keycode)
-
-            else:
-                print("Unknown action:", action)
-
-        led.value = False
+            led.value = False
 
     time.sleep(0.1)

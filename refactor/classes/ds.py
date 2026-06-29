@@ -18,7 +18,7 @@ def createDemonSlayer():
     boundless = Skill(
             name="boundless",
             key=Input.THREE,
-            templateLocation="./ss/laptop/relentless.png"
+            templateLocation="./ss/pc/relentless.png"
         )
 
     chomp = Skill(

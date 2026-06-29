@@ -8,14 +8,11 @@ from engine.rotationController import RotationController
 from classes.ds import createDemonSlayer
 
 LOOP_INTERVAL = 0.5
-VISION_LOCKOUT = 2
+VISION_LOCKOUT = 2.0
 
 
 def main():
     pico = Pico()
-
-    print("pausing for a moment")
-    time.sleep(3)
 
     demonSlayer = createDemonSlayer()
     rotation = demonSlayer.rotations["TPFarming"]
@@ -27,22 +24,28 @@ def main():
     last_restart = 0.0
 
     print(f"Starting rotation: {rotation.name}")
-    print("Press GP15 button on Pico to stop.")
+    print("GP15 = stop | GP14 = pause/resume")
 
     try:
         while True:
 
-            # --- Check for stop signal from Pico button ---
+            #  check for signals from Pico
             if pico.serial.in_waiting > 0:
                 msg = pico.serial.readline().decode().strip().upper()
                 if msg == "STOP":
-                    print("Stop signal received from Pico.")
+                    print("Stop signal received.")
                     break
+                elif msg == "PAUSE":
+                    print("Paused — inputs suppressed, rotation clock continues.")
+                    controller.pause()
+                elif msg == "RESUME":
+                    print("Resumed.")
+                    controller.resume()
 
             now = time.monotonic()
 
-            # --- Vision pass ---
-            if now - last_restart >= VISION_LOCKOUT:
+            #  template match (skip while paused) 
+            if not controller.paused and now - last_restart >= VISION_LOCKOUT:
                 image = screenshot(config.SCREEN_REGION)
 
                 for step in rotation.rotationSteps:
@@ -59,7 +62,6 @@ def main():
                             last_restart = time.monotonic()
                             break
 
-            # --- Rotation tick ---
             controller.update(pico)
 
             time.sleep(LOOP_INTERVAL)
