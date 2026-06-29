@@ -7,14 +7,11 @@ from vision.templateMatcher import matchMyTemplate
 from engine.rotationController import RotationController
 from classes.ds import createDemonSlayer
 
-LOOP_INTERVAL = 0.5       
-VISION_LOCKOUT = 8.0       # seconds to ignore vision after a restart
+LOOP_INTERVAL = 0.5
+VISION_LOCKOUT = 8.0
 
 
 def main():
-    print("waiting a sec to tab in")
-    time.sleep(1)
-
     pico = Pico()
 
     demonSlayer = createDemonSlayer()
@@ -27,9 +24,17 @@ def main():
     last_restart = 0.0
 
     print(f"Starting rotation: {rotation.name}")
+    print("Press GP15 button on Pico to stop.")
 
     try:
         while True:
+
+            # --- Check for stop signal from Pico button ---
+            if pico.serial.in_waiting > 0:
+                msg = pico.serial.readline().decode().strip().upper()
+                if msg == "STOP":
+                    print("Stop signal received from Pico.")
+                    break
 
             now = time.monotonic()
 
@@ -56,17 +61,15 @@ def main():
 
             time.sleep(LOOP_INTERVAL)
 
-
-    except Exception as e:
-        print(f"CRASH: {e}")
-        import traceback
-        traceback.print_exc()
-        pico.release_all()
-        pico.close()
-
     except KeyboardInterrupt:
-        print("Stopping...")
-        pico.release_all()
+        print("Keyboard interrupt.")
+
+    finally:
+        print("Shutting down...")
+        try:
+            pico.release_all()
+        except Exception:
+            pass
         pico.close()
 
 
