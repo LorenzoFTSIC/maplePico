@@ -74,11 +74,11 @@ class RotationController:
             in_window = start <= elapsed < end
 
             if action == "TAP":
-                if in_window and step.vision_ready:
+                if in_window:
                     pico.tap(key)
 
             elif action == "PRESS":
-                if in_window and step.vision_ready and i not in self._held_steps:
+                if in_window and i not in self._held_steps:
                     pico.press(key)
                     self._held_steps.add(i)
                 elif not in_window and i in self._held_steps:
