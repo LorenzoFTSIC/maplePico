@@ -33,7 +33,7 @@ def main():
                     match = matchMyTemplate(
                         template_path=step.skill.templateLocation,
                         image=image,
-                        debug=True
+                        debug=False
                     )
                     step.vision_ready = match is not None
 

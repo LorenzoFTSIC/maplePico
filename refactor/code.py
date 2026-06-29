@@ -1,9 +1,14 @@
-# Pi Pico controller
-# Mimics the inputs received from the main controller
-
 import time
 import usb_cdc
 import usb_hid
+
+
+import board
+import digitalio
+
+led = digitalio.DigitalInOut(board.GP16)
+led.direction = digitalio.Direction.OUTPUT
+
 
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keycode import Keycode
@@ -27,6 +32,9 @@ while True:
         command = serial.readline().decode().strip().upper()
 
         print("RX:", command)
+
+        # Flash LED on every received command
+        led.value = True
 
         parts = command.split()
 
@@ -59,4 +67,6 @@ while True:
             else:
                 print("Unknown action:", action)
 
-    time.sleep(0.01)
+            led.value = False
+
+    time.sleep(0.1)

@@ -9,17 +9,6 @@ class Rotation:
         self.name = name
         self.rotationSteps = []
 
-    # def getElapsedTime(self):
-    #     return time.monotonic() - self.startTime
-    
-    # def getCurrentStep(self, elapsed):
-
-    #     for step in self.rotationSteps:
-    #         if step.currentStart <= elapsed < step.currentEnd:
-    #             return step
-
-    #     return None
-
     def addRotationStep(self, step):
         self.rotationSteps.append(step)
 

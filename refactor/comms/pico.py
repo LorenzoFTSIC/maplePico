@@ -33,3 +33,7 @@ class Pico:
 
     def close(self):
         self.serial.close()
+
+if __name__ == "__main__":
+    pico = Pico()
+    pico._send(f"TAP THREE")

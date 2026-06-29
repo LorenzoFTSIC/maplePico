@@ -33,16 +33,6 @@ def createDemonSlayer():
     tpFarm.addRotationStep(
         RotationStep(
             skill=chomp,
-            start=0,
-            end=1,
-            maxOffset=0.2,
-            action="TAP"
-        )
-    )
-
-    tpFarm.addRotationStep(
-        RotationStep(
-            skill=boundless,
             start=1,
             end=2,
             maxOffset=0.2,
@@ -52,9 +42,19 @@ def createDemonSlayer():
 
     tpFarm.addRotationStep(
         RotationStep(
+            skill=boundless,
+            start=2,
+            end=3,
+            maxOffset=0.2,
+            action="TAP"
+        )
+    )
+
+    tpFarm.addRotationStep(
+        RotationStep(
             skill=concussion,
-            start=3,
-            end=53,
+            start=4,
+            end=54,
             maxOffset=0.2,
             action="PRESS"
         )
@@ -63,8 +63,8 @@ def createDemonSlayer():
     tpFarm.addRotationStep(
         RotationStep(
             skill=concussion,
-            start=49,
-            end=105,
+            start=56,
+            end=110,
             maxOffset=0.2,
             action="PRESS"
         )
