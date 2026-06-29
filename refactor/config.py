@@ -1,11 +1,11 @@
 PICO_PORT = "COM5"
 BAUD_RATE = 115200
 
-MATCH_THRESHOLD = 0.9
+MATCH_THRESHOLD = 0.95
 
 TEST_MODE = False
 #static ss with relentless off CD
-TEST_IMAGE = "./ss/pc/full.png"
+TEST_IMAGE = "./ss/laptop/full.png"
 #static ss with relentless on CD and active
 # TEST_IMAGE = "./ss/pc/bufffavss.png"
 

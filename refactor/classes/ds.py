@@ -18,7 +18,7 @@ def createDemonSlayer():
     boundless = Skill(
             name="boundless",
             key=Input.THREE,
-            templateLocation="./ss/pc/relentless.png"
+            templateLocation="./ss/laptop/relentless.png"
         )
 
     chomp = Skill(
@@ -54,7 +54,7 @@ def createDemonSlayer():
         RotationStep(
             skill=concussion,
             start=2,
-            end=52,
+            end=62.5,
             maxOffset=0.2,
             action="PRESS"
         )
@@ -63,8 +63,8 @@ def createDemonSlayer():
     tpFarm.addRotationStep(
         RotationStep(
             skill=concussion,
-            start=53,
-            end=103,
+            start=63,
+            end=123,
             maxOffset=0.2,
             action="PRESS"
         )

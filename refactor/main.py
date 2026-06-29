@@ -8,11 +8,14 @@ from engine.rotationController import RotationController
 from classes.ds import createDemonSlayer
 
 LOOP_INTERVAL = 0.5
-VISION_LOCKOUT = 8.0
+VISION_LOCKOUT = 2
 
 
 def main():
     pico = Pico()
+
+    print("pausing for a moment")
+    time.sleep(3)
 
     demonSlayer = createDemonSlayer()
     rotation = demonSlayer.rotations["TPFarming"]
