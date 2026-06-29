@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Rotation Control</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --border: #2a2a2a;
+    --text: #e8e8e8;
+    --muted: #888;
+    --accent: #7c6fcd;
+    --accent-dim: #3d3666;
+    --green: #3a9e6e;
+    --green-dim: #1a3d2e;
+    --red: #c94f4f;
+    --red-dim: #3d1f1f;
+    --amber: #c48d30;
+    --amber-dim: #3d2d10;
+    --radius: 12px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 40px;
+    gap: 20px;
+  }
+
+  header {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* Status card */
+  .status-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+  }
+
+  .status-row .label { color: var(--muted); }
+  .status-row .value { font-weight: 500; font-variant-numeric: tabular-nums; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 99px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .badge.running { background: var(--green-dim); color: var(--green); }
+  .badge.paused  { background: var(--amber-dim); color: var(--amber); }
+  .badge.stopped { background: var(--red-dim);   color: var(--red); }
+
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .dot.pulse {
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.4s linear;
+  }
+
+  /* Button grid */
+  .btn-grid {
+    width: 100%;
+    max-width: 420px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .btn {
+    border: none;
+    border-radius: var(--radius);
+    font-size: 16px;
+    font-weight: 600;
+    padding: 18px 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: opacity 0.15s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .btn:active { transform: scale(0.96); opacity: 0.85; }
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+  .btn .icon { font-size: 28px; line-height: 1; }
+  .btn .label { font-size: 13px; font-weight: 500; }
+
+  .btn-pause   { background: var(--amber-dim); color: var(--amber); }
+  .btn-resume  { background: var(--green-dim); color: var(--green); }
+  .btn-restart { background: var(--accent-dim); color: var(--accent); }
+  .btn-stop    { background: var(--red-dim);   color: var(--red); }
+  .btn-stop.wide { grid-column: 1 / -1; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #2a2a2a;
+    color: var(--text);
+    font-size: 13px;
+    padding: 10px 20px;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+    transition: transform 0.25s ease, opacity 0.25s ease;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Rotation Control</h1>
+  <div class="subtitle" id="rotation-name">Connecting...</div>
+</header>
+
+<div class="status-card">
+  <div class="status-row">
+    <span class="label">State</span>
+    <span id="badge" class="badge stopped">
+      <span class="dot" id="dot"></span>
+      <span id="state-text">—</span>
+    </span>
+  </div>
+  <div class="status-row">
+    <span class="label">Elapsed</span>
+    <span class="value" id="elapsed">—</span>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-fill" id="progress" style="width: 0%"></div>
+  </div>
+</div>
+
+<div class="btn-grid">
+  <button class="btn btn-pause"   id="btn-pause"   onclick="send('/pause')">
+    <span class="icon">⏸</span><span class="label">Pause</span>
+  </button>
+  <button class="btn btn-resume"  id="btn-resume"  onclick="send('/resume')">
+    <span class="icon">▶</span><span class="label">Resume</span>
+  </button>
+  <button class="btn btn-restart" id="btn-restart" onclick="send('/restart')">
+    <span class="icon">↺</span><span class="label">Restart</span>
+  </button>
+  <button class="btn btn-stop wide" id="btn-stop" onclick="send('/stop')">
+    <span class="icon">⏹</span><span class="label">Stop</span>
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const ROTATION_DURATION = 105;  // seconds — matches your rotation's total length
+
+  let currentState = "running";
+
+  async function send(endpoint) {
+    try {
+      const res = await fetch(endpoint, { method: "POST" });
+      const data = await res.json();
+      showToast(data.status);
+      updateUI(data.status, null);
+    } catch (e) {
+      showToast("Connection error");
+    }
+  }
+
+  async function pollStatus() {
+    try {
+      const res = await fetch("/status");
+      const data = await res.json();
+
+      document.getElementById("rotation-name").textContent = data.rotation;
+
+      let state = "stopped";
+      if (!data.running) state = "stopped";
+      else if (data.paused) state = "paused";
+      else state = "running";
+
+      updateUI(state, data.elapsed);
+
+    } catch (e) {
+      updateUI("stopped", null);
+    }
+  }
+
+  function updateUI(state, elapsed) {
+    currentState = state;
+
+    const badge = document.getElementById("badge");
+    const dot   = document.getElementById("dot");
+    const stateText = document.getElementById("state-text");
+    const elapsedEl = document.getElementById("elapsed");
+    const progress  = document.getElementById("progress");
+
+    badge.className = "badge " + state;
+    dot.className   = "dot" + (state === "running" ? " pulse" : "");
+    stateText.textContent = state;
+
+    if (elapsed !== null) {
+      const mins = Math.floor(elapsed / 60);
+      const secs = Math.floor(elapsed % 60).toString().padStart(2, "0");
+      elapsedEl.textContent = mins > 0 ? `${mins}m ${secs}s` : `${elapsed.toFixed(1)}s`;
+      const pct = Math.min((elapsed / ROTATION_DURATION) * 100, 100);
+      progress.style.width = pct + "%";
+    } else {
+      elapsedEl.textContent = "—";
+      progress.style.width = "0%";
+    }
+
+    document.getElementById("btn-pause").disabled   = state !== "running";
+    document.getElementById("btn-resume").disabled  = state !== "paused";
+    document.getElementById("btn-restart").disabled = state === "stopped";
+    document.getElementById("btn-stop").disabled    = state === "stopped";
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 2200);
+  }
+
+  pollStatus();
+  setInterval(pollStatus, 1500);
+</script>
+</body>
+</html>

@@ -64,9 +64,11 @@ class RotationController:
             return
 
         elapsed = self.elapsed()
+        print(elapsed)
 
         for i, step in enumerate(self.rotation.rotationSteps):
 
+            print(step.skill.name)
             start = step.currentStart
             end = step.currentEnd
             action = step.action

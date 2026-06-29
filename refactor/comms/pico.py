@@ -1,4 +1,5 @@
 import time
+import threading
 import serial
 import config
 
@@ -6,20 +7,23 @@ import config
 class Pico:
 
     def __init__(self):
-
         self.serial = serial.Serial(
             config.PICO_PORT,
             config.BAUD_RATE,
-            write_timeout=1.0  # don't block longer than 1 second
+            write_timeout=1.0
         )
+        self._lock = threading.Lock()
 
         # CircuitPython time to reboot
-        # time.sleep(2)
+        time.sleep(2)
 
     def _send(self, command):
         try:
-            self.serial.write(f"{command}\n".encode())
+            with self._lock:
+                self.serial.write(f"{command}\n".encode())
             print("TX:", command)
+        except serial.SerialTimeoutException:
+            print(f"TX failed (timeout): {command}")
         except Exception as e:
             print(f"TX failed: {e}")
 
@@ -44,7 +48,3 @@ class Pico:
             self.serial.close()
         except Exception:
             pass
-
-if __name__ == "__main__":
-    pico = Pico()
-    pico._send(f"TAP THREE")
