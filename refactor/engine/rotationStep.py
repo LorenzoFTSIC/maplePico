@@ -4,6 +4,7 @@ class RotationStep:
     def __init__(self, skill, start, end, action, maxOffset=0):
 
         self.skill = skill
+        self.vision_ready = skill.templateLocation is None
 
         # Base timings
         self.start = start

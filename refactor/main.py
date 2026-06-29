@@ -1,5 +1,3 @@
-# Main controller for template matching and determining input pattern
-# Inputs get sent to pi pico then returned
 import time
 
 import config
@@ -9,7 +7,7 @@ from vision.templateMatcher import matchMyTemplate
 from engine.rotationController import RotationController
 from classes.ds import createDemonSlayer
 
-LOOP_INTERVAL = 1  # seconds between update ticks
+LOOP_INTERVAL = 1 
 
 
 def main():
@@ -26,23 +24,22 @@ def main():
 
     try:
         while True:
-            #
+
+            # find buff that triggers a new rotation
             image = screenshot(config.SCREEN_REGION)
 
             for step in rotation.rotationSteps:
-                skill = step.skill
-                if skill.templateLocation is not None:
+                if step.skill.templateLocation is not None:
                     match = matchMyTemplate(
-                        template_path=skill.templateLocation,
+                        template_path=step.skill.templateLocation,
                         image=image,
-                        debug=False
+                        debug=True
                     )
-                    #only trigger if template is detected
                     step.vision_ready = match is not None
 
-            # controller.update(pico)
+            controller.update(pico)
 
-            # restart rotation when complet
+            # restart when completes
             total_duration = max(
                 step.currentEnd for step in rotation.rotationSteps
             )
@@ -54,8 +51,8 @@ def main():
 
     except KeyboardInterrupt:
         print("Stopping...")
-        # pico.release_all()
-        # pico.close()
+        pico.release_all()
+        pico.close()
 
 
 if __name__ == "__main__":
